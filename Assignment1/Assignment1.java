@@ -26,7 +26,7 @@ public class Assignment1 {
     	
     	ArrayList<String> wordList = new ArrayList<String>();
     	
-    	Map<ArrayList<String>, Integer> wordMap = new HashMap<ArrayList<String>, Integer>();
+    	Map<String, Integer> wordMap = new HashMap<String, Integer>();
     	
     	try {
     		Scanner sc = new Scanner(new File(path));
@@ -44,47 +44,45 @@ public class Assignment1 {
     		e.printStackTrace();
     	}
     	System.out.println(wordList.size());
-    	System.out.println(wordList.get(0));
     	int countDown  = n;
     	int count = 0;
-    	ArrayList<String> sequence = new ArrayList<String>();
+    	//ArrayList<String> sequence = new ArrayList<String>();
+    	StringBuilder sb = new StringBuilder();
+    	String sequence = "";
     	
     	for(int i = 0; i<wordList.size(); i++) {
-    		sequence.clear();
-    		count = 0;
+    		sb.setLength(0);
+    		sequence = "";
     		if(i+n > wordList.size()) {
     			break;
     		}
     		// create sequence of length n
     		for(int j = 0; j<n; j++) {
-    			sequence.add(wordList.get(i+j));
+    			if(sb.length() > 0) {
+    				sb.append(" ");
+    			}
+    			sb.append(wordList.get(i+j));
     		}
+    		sequence = sb.toString();
     		
         	//insert sequence into hashmap
         	if(wordMap.containsKey(sequence)) {
         		wordMap.put(sequence, wordMap.get(sequence)+1);
-        		System.out.println(sequence);
         	} else {
         		wordMap.put(sequence, 1);
         	}
     	}
     	
     	System.out.println(wordMap.size());
-    	//System.out.println(wordList);
-    	
-    	/*for (List<String> name: wordMap.keySet()){
 
-            String key =name.toString();
-            String value = wordMap.get(name).toString();  
-            System.out.println(name + " " + value);
-    	}*/
-    	
-    	for (Entry<ArrayList<String>, Integer> entry : wordMap.entrySet()) {
-            ArrayList<String> key = entry.getKey();
+    	int totalFreq = 0;
+    	for (Entry<String, Integer> entry : wordMap.entrySet()) {
+            String key = entry.getKey();
             Integer value = entry.getValue();
-            //System.out.println(key.size());
-            System.out.println("key, " + key + " value " + value );
+            totalFreq += value;
+            System.out.println(key + "   " + value );
         }
+    	System.out.println("Total frequencies: " + totalFreq);
     	
     	String[] wordArray = new String[m];
     	int[] countArray = new int[m];
