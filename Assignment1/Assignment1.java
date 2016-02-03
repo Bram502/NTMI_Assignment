@@ -2,9 +2,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
+
 
 public class Assignment1 {
 	public static void main(String[] args) {
@@ -21,51 +22,81 @@ public class Assignment1 {
     			m = Integer.parseInt(args[i+1]);
     		}
     	}
+    	if(path == null || n ==0 || m==0) {
+    		System.out.println("Correct usage to run: -corpus [path] -n [value] -m [value]");
+    		System.exit(0);
+    	}
     	
-    	List<String> wordList = new ArrayList<String>();
+    	ArrayList<String> wordList = createWordList(path);
+    	Map<String, Integer> wordMap = createWordMap(wordList, n);
+
+    	int totalFreq = 0;
+    	// Print all sequences with their frequencies and count the 
+    	// total amount of frequencies
+    	for (Entry<String, Integer> entry : wordMap.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            totalFreq += value;
+            System.out.println(key + "   " + value );
+        }
     	
-    	Map<String, Integer> wordMap = null;
+    	System.out.println("Total frequencies: " + totalFreq);
+    	
+    }
+
+	private static ArrayList<String> createWordList(String path) {
+		ArrayList<String> wordList = new ArrayList<String>();
     	
     	try {
     		Scanner sc = new Scanner(new File(path));
 
-    		wordMap = new HashMap<String, Integer>();
-
     		
 	    	while(sc.hasNext()) {
 	    		String word = sc.next();
-
 	    		wordList.add(word);
 	    	}
 
 	    	sc.close();
 
-	    	System.out.println(wordMap.size());
-
 
     	} catch(IOException e) {
     		e.printStackTrace();
     	}
-    	System.out.println(wordList.size());
-    	
-    	int countDown  = n;
-    	int count = 0;
-    	int j = 1;
+		return wordList;
+	}
+	
+	private static Map<String, Integer> createWordMap(ArrayList<String> wordList, int n) {
+		Map<String, Integer> wordMap = new HashMap<String, Integer>();
+		
+		StringBuilder sb = new StringBuilder();
+    	String sequence = "";
     	
     	for(int i = 0; i<wordList.size(); i++) {
-    		while(countDown > 0) {
-    			count = 0;
+    		sb.setLength(0);
+    		sequence = "";
+    		
+    		// End of word list reached
+    		if(i+n > wordList.size()) {
+    			break;
     		}
-    	}
-    	for (String name: wordMap.keySet()){
-
-            String key =name.toString();
-            String value = wordMap.get(name).toString();  
-            System.out.println(key + " " + value);
+    		
+    		// Create sequence of length n
+    		for(int j = 0; j<n; j++) {
+    			if(sb.length() > 0) {
+    				sb.append(" ");
+    			}
+    			sb.append(wordList.get(i+j));
+    		}
+    		sequence = sb.toString();
+    		
+        	// Insert sequence into hashmap
+        	if(wordMap.containsKey(sequence)) {
+        		wordMap.put(sequence, wordMap.get(sequence)+1);
+        	} else {
+        		wordMap.put(sequence, 1);
+        	}
     	}
     	
-    	String[] wordArray = new String[m];
-    	int[] countArray = new int[m];
-    	
-    }
+		return wordMap;
+	}
 }
