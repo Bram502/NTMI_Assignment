@@ -96,7 +96,7 @@ public class A1Step1 {
 		return wordList;
 	}
 	
-
+    
 	private static Map<String, Integer> createWordMap(ArrayList<String> wordList, int n) {
 
 		Map<String, Integer> wordMap = new HashMap<String, Integer>();		
@@ -105,7 +105,6 @@ public class A1Step1 {
     	
     	for(int i = 0; i<wordList.size(); i++) {
     		sb.setLength(0);
-    		sequence = "";
     		// End of word list reached
     		if(i+n > wordList.size()) {
     			break;
