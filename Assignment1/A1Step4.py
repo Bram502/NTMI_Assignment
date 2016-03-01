@@ -262,9 +262,9 @@ def iterate_sentences(smoothing, word_list, transition_probs, total_emission_pro
                 #     break
                 start_probs, emission_probs = define_hmm(state_list, sentence, transition_probs, total_emission_probs)
                 best_state_sequence, predicted_set = viterbi_algorithm(smoothing, state_list, sentence, start_probs, transition_probs, emission_probs, state_freq_n1, word_frequencies, state_frequencies)
-                print(' '.join(sentence))
-                print("Best state sequence: " + str(best_state_sequence))
-                print("Real state sequence: " + str(tag_sentence) + "\n")
+                # print(' '.join(sentence))
+                # print("Best state sequence: " + str(best_state_sequence))
+                # print("Real state sequence: " + str(tag_sentence) + "\n")
                 
                 all_predicted_sets.append(predicted_set)
                 
