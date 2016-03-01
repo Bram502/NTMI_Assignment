@@ -135,6 +135,8 @@ def calc_turing_smoothing(bigram_count, unigram_count, vocabulary_size, n_freqs)
     else:
         if(bigram_count > 0 and bigram_count <= k):
             c_star = calc_c_star(bigram_count, n_freqs)
+            print("Nc: " + bigram_count)
+            print("c*: " + c_star) 
         else:
             # if c > 5, c* = c
             c_star = bigram_count
@@ -148,7 +150,7 @@ def calc_c_star(count, n_freqs, vocabulary_size, total_words):
     y = count * (((k+1)*n_freqs[k+1])/n_freqs[1])
     z = 1 - (((k+1)*n_freqs[k+1])/n_freqs[1])
     c_star = (x - y) / z
-
+    
     return c_star
 
 ################################################################################

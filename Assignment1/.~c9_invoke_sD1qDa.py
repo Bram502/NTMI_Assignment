@@ -1,13 +1,10 @@
 from collections import Counter
 import numpy as np
-import argparse
 
 def main():
     training_data = "WSJ02-21.pos"
     test_data = "WSJ23.pos"
     predicted_test_file = "predicted-test-set.txt"
-    smoothing = True
-    
     
     print("Starting program with input:")
     print("Training data: " + training_data)
@@ -17,33 +14,26 @@ def main():
     print("\nParsing training data..")
     state_bigrams, state_frequencies, state_word_frequencies, word_frequencies = parse_training_data(training_data)
 
-
-    state_list = [x[0] for x,y in state_frequencies.items()]
+    smooth)
     vocabulary_size = len(state_list)
     state_list.remove('<s>')
 
-
-    state_freq_n1 = {}
-    if(smoothing):
-        # state_bigrams, n0 = smooth_language_model(state_bigrams, vocabulary_size)
-        state_freq_n1, state_word_frequencies = smooth_lexical_model(state_list, state_word_frequencies, word_frequencies)
+    
+    n_freqs = smooth_language_model(state_bigrams, vocabulary_size)
     
     print("\nCalculating probabilities..")
-    
-    transition_probs = calc_transition_probs(state_bigrams, state_frequencies)
-    emission_probs = calc_emission_probs(state_word_frequencies, state_frequencies)
+    transition_probs = calc_transition_probs(False, state_bigrams, state_frequencies)
+    emission_probs = calc_emission_probs(False, state_word_frequencies, state_frequencies)
     
     print("\nParsing test data..")
     test_data_word_list = parse_test_data(test_data)
     
     
     
-    print("\nCalculating accuracy of training data compared to real data from test file..")
+    # print("\nCalculating accuracy of training data compared to real data from test file..")
+    # accuracy, all_predicted_sets = iterate_sentences(test_data_word_list, transition_probs, emission_probs, state_list)
     
-    accuracy, all_predicted_sets = iterate_sentences(smoothing, test_data_word_list, transition_probs, emission_probs, state_list, state_freq_n1, word_frequencies, state_frequencies)
-        
-    
-    print("\nAccuracy: " + str(accuracy))
+    # print("\nAccuracy: " + str(accuracy))
     
     # print("\nWriting predicted data to predicted test file" + predicted_test_file)
     # print_to_file(all_predicted_sets, predicted_test_file)
@@ -71,55 +61,15 @@ def smooth_language_model(state_bigrams, vocabulary_size):
                 
     n0 = vocabulary_size ** 2 - len(state_bigrams)
     
-    #calc c* for 4 > k > 0
-    c_star_counts = {}
-    for key, value in n_freqs.items():
-        print(key, value)
-        if(key < k+1):
-            c_star_counts[key] = calc_c_star(key, n_freqs)
-    #print(state_bigrams)    
-    print(c_star_counts)
-    
     for key, value in state_bigrams.items():
-        if((value in n_freqs) and (value < k+1)):
-            state_bigrams[key] = c_star_counts[value]
+        if value i
+
     n_freqs[0] = n0
     
+
+    
     print("bigram frequency dict", n_freqs)
-    return state_bigrams, n0
-    
-def smooth_lexical_model(state_list, state_word_frequencies, word_frequencies):
-    #c_star0 = (1/2) * ()
-    state_freq_n1 = {}
-    for state in state_list:
-        if state != "</s>":
-            state_freq_n1[state] = 0
-            for word, value in state_word_frequencies.items():
-                if state == word[1] and value == 1:
-                    state_freq_n1[state] += 1
-    
-    for key, value in state_word_frequencies.items():
-        if value == 1:
-            state_word_frequencies[key] = 0.5
-          
-    return state_freq_n1, state_word_frequencies
-
-def calc_c_star(count, n_freqs):
-    k = 4
-    print("\n Count: ",count)
-    x = (count + 1) * (n_freqs[count+1]/n_freqs[count])
-    # print("nfreqs[count+1]: " , n_freqs[count+1])
-    # print("n_freqs[count]: ", n_freqs[count])
-    print("x",x)
-    y = count * (((k+1)*n_freqs[k+1])/n_freqs[1])
-    print("y",y)
-    z = 1 - (((k+1)*n_freqs[k+1])/n_freqs[1])
-    # print("nfreqs[k+1]", n_freqs[k+1])
-    # print("nfreqs[1]", n_freqs[1])
-    print("z",z)
-    c_star = (x - y) / z
-
-    return c_star
+    return n_freqs
 
 def parse_training_data(trainingData):
     state_list = ["<s>"]
@@ -160,12 +110,13 @@ def state_bigrams(line, prev_word):
                 word = word.split('/')
                 if(word[-1][0].isalnum()):
                     
-                    # if('|' in word[-1]):
-                    #     word_list.append(word[-1].split('|')[0])
-                    # else:
-                    word_list.append(word[-1])
+                    if('|' in word[-1]):
+                        word_list.append(word[-1].split('|')[0])
+                    else:
+                        word_list.append(word[-1])
                     
     return word_list
+
 
 # Counts the frequencies of words linked with certain states    
 def state_word_frequencies(line):
@@ -183,7 +134,7 @@ def state_word_frequencies(line):
     
 
 # Calculates the transition probability for  the transition model   
-def calc_transition_probs(state_bigrams, state_frequencies):
+def calc_transition_probs(smoothing,  state_bigrams, state_frequencies):
     """
     Data structure looks like this:
     {
@@ -193,20 +144,22 @@ def calc_transition_probs(state_bigrams, state_frequencies):
     """
     
     transition_probs = {}
+    if smoothing:
+        pass
+    else:
+        for key, value in state_bigrams.items():
+            history = key[0]
+            if(history != 0):
+                mle = value / state_frequencies[tuple([key[0]])]
 
-    for key, value in state_bigrams.items():
-        history = key[0]
-        if(history != 0):
-            mle = value / state_frequencies[tuple([key[0]])]
-
-            if(history not in transition_probs):
-                transition_probs[history] = {key[1]: mle}
-            else:
-                transition_probs[history][key[1]] = mle
+                if(history not in transition_probs):
+                    transition_probs[history] = {key[1]: mle}
+                else:
+                    transition_probs[history][key[1]] = mle
     return transition_probs
     
 # Used to calculate the probabilities for the Emission model
-def calc_emission_probs(state_word_frequencies, state_frequencies):
+def calc_emission_probs(smoothing, state_word_frequencies, state_frequencies):
     """
     Data structure looks like this:
     {
@@ -215,16 +168,18 @@ def calc_emission_probs(state_word_frequencies, state_frequencies):
     }
     """
     emission_probs = {}
-
-    for key, value in state_word_frequencies.items():
-        history = key[1]
-        if(state_frequencies[tuple([key[1]])] != 0):
-            mle = value / state_frequencies[tuple([key[1]])]
-            
-            if(history not in emission_probs):
-                emission_probs[history] = {key[0]: mle}
-            else:
-                emission_probs[history][key[0]] = mle
+    if smoothing:
+        pass
+    else:
+        for key, value in state_word_frequencies.items():
+            history = key[1]
+            if(state_frequencies[tuple([key[1]])] != 0):
+                mle = value / state_frequencies[tuple([key[1]])]
+                
+                if(history not in emission_probs):
+                    emission_probs[history] = {key[0]: mle}
+                else:
+                    emission_probs[history][key[0]] = mle
     return emission_probs
     
 def parse_test_data(test_data):
@@ -247,24 +202,25 @@ def parse_test_data(test_data):
     return word_list
 
 
-def iterate_sentences(smoothing, word_list, transition_probs, total_emission_probs, state_list, state_freq_n1, word_frequencies, state_frequencies):
+def iterate_sentences(word_list, transition_probs, total_emission_probs, state_list):
     sentence = []
     tag_sentence = []
     all_predicted_sets = []
+    count = 0
     correct = 0
     total = 0
-    count = 0
     for word in word_list:
+        
+        # if(count == 10):
+        #     break
         if(word == "</s>"):
             if(len(sentence) != 0 and len(sentence) < 15):
-                # count+=1
-                # if(count == 15):
-                #     break
+
                 start_probs, emission_probs = define_hmm(state_list, sentence, transition_probs, total_emission_probs)
-                best_state_sequence, predicted_set = viterbi_algorithm(smoothing, state_list, sentence, start_probs, transition_probs, emission_probs, state_freq_n1, word_frequencies, state_frequencies)
-                print(' '.join(sentence))
-                print("Best state sequence: " + str(best_state_sequence))
-                print("Real state sequence: " + str(tag_sentence) + "\n")
+                best_state_sequence, predicted_set = viterbi_algorithm(state_list, sentence, start_probs, transition_probs, emission_probs)
+                # print(' '.join(sentence))
+                # print("Best state sequence: " + str(best_state_sequence))
+                # print("Real state sequence: " + str(tag_sentence) + "\n")
                 
                 all_predicted_sets.append(predicted_set)
                 
@@ -280,13 +236,14 @@ def iterate_sentences(smoothing, word_list, transition_probs, total_emission_pro
         if(word != "<s>" and word != "</s>"):
             sentence.append(word[0])
             tag_sentence.append(word[1])
-    print(total)
+            
     return (correct/ total), all_predicted_sets
             
 
 def define_hmm(states, observations, transition_probs, total_emission_probs):
 
     start_probs = transition_probs["<s>"]
+    
     emission_probs = {}
     for state in states:
         if(state != "<s>" and state != "</s>"):
@@ -313,23 +270,16 @@ def define_hmm(states, observations, transition_probs, total_emission_probs):
     #     'q2': {'x': 0.1, 'z': 0.2, 'y': 0.7, }
     #     }
     
-def viterbi_algorithm(smoothing, states, observations, start_probs, transition_probs, emission_probs, state_freq_n1, word_frequencies, state_frequencies):
+def viterbi_algorithm(states, observations, start_probs, transition_probs, emission_probs):
     v = np.zeros((len(states),len(observations)))
     #first column
     for i, state in enumerate(states):
         if(state in start_probs):
-            if(smoothing):
-                if(tuple([observations[0]]) in word_frequencies):
-                    v[i][0] = start_probs[state] * emission_probs[state][observations[0]]
-                else:
-                    v[i][0] = start_probs[state] * ((state_freq_n1[state] * 0.5) / state_frequencies[tuple([state])] )
-            else:    
-                v[i][0] = start_probs[state] * emission_probs[state][observations[0]]
+            v[i][0] = start_probs[state] * emission_probs[state][observations[0]]
         else:
             v[i][0] = 0
-            
-            
-
+        
+    
     #loop through columns v(j,t) = max^N_i=1 v(i, t-1)*a_ij*b_j(O_t)
     for t in range(1, len(observations)):
         
@@ -342,22 +292,10 @@ def viterbi_algorithm(smoothing, states, observations, start_probs, transition_p
                 
                 # if(states[i] in transition_probs):
                 #     if(states[j] in transition_probs[states[i]]):'
-                
-                if(smoothing):
-                    try:
-                        if(tuple([observations[t]]) in word_frequencies):
-                            value = v[i][t-1] * transition_probs[states[i]][states[j]] * emission_probs[states[j]][observations[t]]
-                        else:
-                            value = v[i][t-1] * transition_probs[states[i]][states[j]] * ((state_freq_n1[states[j]] * 0.5) / state_frequencies[tuple([states[j]])] )
-                    except KeyError:
-                        value = 0
-                        
-                else:        
-                    try:
-                        value = v[i][t-1] * transition_probs[states[i]][states[j]] * emission_probs[states[j]][observations[t]]
-                    except KeyError:
-                        value = 0        
-                        
+                try:
+                    value = v[i][t-1] * transition_probs[states[i]][states[j]] * emission_probs[states[j]][observations[t]]
+                except KeyError:
+                    value = 0
                         
                 if(value > max_value):
                     max_value = value
