@@ -30,6 +30,7 @@ def make_ngrams(corpus, n):
     # Note: in python 2.7 the list() does nothing, but it is required in
     # python 3 as zip returns an iterator instead of list.
     ngrams = list(zip(*[word_list[i:] for i in range(n)]))
+    print(ngrams)
  
     # Counter is a high performance dictionary made for
     # counting and analyzing frequencies
